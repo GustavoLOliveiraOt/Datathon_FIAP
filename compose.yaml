@@ -4,6 +4,7 @@ services:
   rocm-container:
     image: rocm/rocm-build-ubuntu-22.04
     container_name: rocm-container
+
     devices:
       - /dev/kfd
       - /dev/dri
