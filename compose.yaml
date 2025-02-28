@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  rocm-container:
+    image: rocm/rocm-build-ubuntu-22.04
+    container_name: rocm-container
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - ./static:/workspace/static
+      - ./cluestering.py:/workspace/cluestering.py
+      - ./requirementsClustering.txt:/workspace/requirements.txt
+    shm_size: "8G"
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+    entrypoint: ["/bin/bash", "/workspace/entrypoint.sh"]
+
+  app-fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: app-fastapi
+    volumes:
+      - ./main.py:/app/main.py
+      - ./requirementsFastApi.txt:/app/requirements.txt
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rocm-container
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
